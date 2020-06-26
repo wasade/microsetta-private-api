@@ -67,3 +67,6 @@ class KitRepo(BaseRepo):
             else:
                 samples = [sample_repo._get_sample_by_id(r[1]) for r in rows]
                 return Kit(rows[0][0], samples)
+
+    def get_kit_exists(self, supplied_kit_id):
+        return self.get_kit_all_samples(supplied_kit_id) is not None

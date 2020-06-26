@@ -54,7 +54,7 @@ class KitRepoTests(unittest.TestCase):
         with Transaction() as t:
             kit_repo = KitRepo(t)
             self.assertTrue(kit_repo.get_kit_exists(self.valid_kit_id))
-            self.assertTrue(kit_repo.get_kit_exists(self.invalid_kit_id))
+            self.assertFalse(kit_repo.get_kit_exists(self.invalid_kit_id))
 
 
 if __name__ == '__main__':
