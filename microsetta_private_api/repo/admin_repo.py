@@ -163,6 +163,26 @@ class AdminRepo(BaseRepo):
                             for i in range(name_length))
         return prefix + '_' + rand_name
 
+    def project_exists(self, project_name):
+        """Tests for the existance of a project by name
+
+        Parameters
+        ----------
+        project_name : str
+            The name of the project
+
+        Returns
+        -------
+        bool
+            True if the project exists, false otherwise
+        """
+        with self._transaction.cursor() as cur:
+            cur.execute("SELECT EXISTS("
+                        "    SELECT 1 "
+                        "    FROM barcodes.project "
+                        "    WHERE project=%s)", (project_name, ))
+            return cur.fetchone()[0]
+
     def create_kits(self, number_of_kits, number_of_samples, kit_prefix,
                     projects):
         """Create kits each with the same number of samples

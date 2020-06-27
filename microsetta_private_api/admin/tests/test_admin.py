@@ -120,6 +120,44 @@ class AdminTests(TestCase):
             diag = admin_repo.retrieve_diagnostics_by_barcode('NotABarcode :D')
             self.assertIsNone(diag)
 
+    def test_project_exists(self):
+        with Transaction() as t:
+            admin_repo = AdminRepo(t)
+            self.assertFalse(admin_repo.project_exists('doesnotexist'))
+            admin_repo.create_project('newmicrosetta', True)
+            self.assertTrue(admin_repo.project_exists('newmicrosetta'))
+            admin_repo.create_project('newnonmicrosetta', True)
+            self.assertTrue(admin_repo.project_exists('newnonmicrosetta'))
+
+    def test_associate_kit_to_project(self):
+        with Transaction() as t:
+            admin_repo = AdminRepo(t)
+            admin_repo.create_project('some-existing-project', False)
+            admin_repo.create_project('newmicrosetta', True)
+            tmi = admin_repo.create_kits(1, 1, '', ['some-existing-project'])
+            kit_id = tmi['created'][0]['kit_id']
+            sample_barcode = tmi['created'][0]['sample_barcodes'][0]
+
+            without_new_project = \
+                admin_repo.retrieve_diagnostics_by_barcode(sample_barcode)
+            self.assertEqual(
+                len(without_new_project['barcode_info']['projects']), 1)
+            self.assertEqual(
+                without_new_project['barcode_info']['projects'][0],
+                'some-existing-project')
+
+            admin_repo.associate_kit_to_project(kit_id, 'newmicrosetta')
+            with_new_project = \
+                admin_repo.retrieve_diagnostics_by_barcode(sample_barcode)
+            self.assertEqual(
+                len(with_new_project['barcode_info']['projects']), 2)
+            obs = {p['project'] for p in
+                   with_new_project['barcode_info']['projects']}
+            self.assertEqual(obs, {'some-existing-project', 'newmicrosetta'})
+
+            # VERIFY SETUP FOR MICROSETTA ETC ETC
+            # VERIFY NON MICROSETTA CREATION
+
     def test_create_project(self):
         with Transaction() as t:
             admin_repo = AdminRepo(t)

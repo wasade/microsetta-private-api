@@ -4,6 +4,7 @@ from flask import jsonify
 from microsetta_private_api.repo.account_repo import AccountRepo
 from microsetta_private_api.repo.transaction import Transaction
 from microsetta_private_api.repo.admin_repo import AdminRepo
+from microsetta_private_api.repo.kit_repo import KitRepo
 from werkzeug.exceptions import Unauthorized
 
 
@@ -146,3 +147,23 @@ def create_kits(body, token_info):
             t.commit()
 
     return jsonify(kits), 201
+
+
+def associate_project(project_name, kit_id, body, token_info):
+    validate_admin_access(token_info)
+
+    with Transaction() as t:
+        admin_repo = AdminRepo(t)
+        kit_repo = KitRepo(t)
+
+        if not kit_repo.get_kit_exists(kit_id):
+            return jsonify(code=404, message=f"{kit_id} does not exist"), 404
+
+        if not admin_repo.get_project_exists(project_name):
+            return jsonify(code=404,
+                           message=f"{project_name} does not exist"), 404
+
+        admin_repo.associate_kit_to_project(kit_id, project_name)
+
+    print(project_name, kit_id)
+    return {}, 201
