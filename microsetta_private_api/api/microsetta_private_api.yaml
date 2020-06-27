@@ -1069,6 +1069,36 @@ paths:
         '404':
           $ref: '#/components/responses/404NotFound'
 
+  '/admin/project/{project_name}/{kit_id}':
+    post:
+      operationId: microsetta_private_api.admin.admin_impl.associate_project
+      tags:
+        - Admin
+      summary: Add a project association to an existing kit
+      description: Add a project association to an existing kit
+      parameters:
+        - in: path
+          name: kit_id
+          description: User-facing id of kit
+          schema:
+            $ref: '#/components/schemas/kit_name'
+          required: true
+        - in: path
+          name: project_name
+          description: User-facing name of a project
+          schema:
+            $ref: '#/components/schemas/sample_project'
+          required: true
+
+      responses:
+        '201':
+          description: kit successfully associated to the project
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          description: the kit or project name are unknown
+
+  # TODO: this should probably be /admin/project/create
   '/admin/create/project':
     post:
       operationId: microsetta_private_api.admin.admin_impl.create_project
@@ -1229,6 +1259,13 @@ components:
 
 
     # query parameters
+    project_name:
+      name: project_name
+      in: query
+      description: User-facing name of a project
+      schema:
+        $ref: '#components/schemas/sample_project'
+      required: true
     kit_name:
       name: kit_name
       in: query
